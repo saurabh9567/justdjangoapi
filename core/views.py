@@ -8,6 +8,23 @@ from .sereializers import PostSerializer
 from .models import Post
 
 
+class TestView(APIView):
+
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, *args, **kwargs):
+        qs = Post.objects.all()
+        serializer = PostSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+
+
 class PostView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     '''Shorter version of TestView -- commented below'''
     serializer_class = PostSerializer
@@ -20,6 +37,10 @@ class PostView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericA
         return self.create(request, *args, **kwargs)
 
 
+class PostCreateView(generics.ListAPIView):
+    '''Shorter version of PostView'''
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
 
 
 
@@ -35,21 +56,7 @@ class PostView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericA
 
 
 
-# class TestView(APIView):
-#
-#     permission_classes = (IsAuthenticated, )
-#
-#     def get(self, request, *args, **kwargs):
-#         qs = Post.objects.all()
-#         serializer = PostSerializer(qs, many=True)
-#         return Response(serializer.data)
-#
-#     def post(self, request, *args, **kwargs):
-#         serializer = PostSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors)
+
 
 
 
